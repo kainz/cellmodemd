@@ -172,7 +172,7 @@ func (sc *simpleConnector) TriggerInterface() error {
 	networkcmd := exec.CommandContext(ctx, "networkctl", "reload")
 
 	output, err := networkcmd.CombinedOutput()
-	log.Println("network ctl output was (", err, "):", output)
+	log.Println("network ctl output was (", err, "):", string(output))
 	if err != nil {
 		return err
 	}
