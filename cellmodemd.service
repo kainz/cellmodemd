@@ -1,14 +1,12 @@
 [Unit]
 Description=cellmodemd
 Wants=network-pre.target
-StartLimitBurst=10
-StartLimitIntervalSec=30
-
 
 [Service]
 Type=simple
 ExecStart=/usr/sbin/cellmodemd -a APN-HERE
 Restart=always
+RestartSec=30s
 
 [Install]
 WantedBy=multi-user.target
