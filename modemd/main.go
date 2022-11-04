@@ -43,10 +43,10 @@ func main() {
 		}
 
 		bearer := connector.GetBearer()
-		bjson, err := bearer.MarshalJSON()
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		//bjson, err := bearer.MarshalJSON()
+		//if err != nil {
+		//	log.Fatal(err.Error())
+		//}
 
 		c_if, err := bearer.GetInterface()
 		if err != nil {
@@ -63,12 +63,28 @@ func main() {
 			log.Fatal(err.Error())
 		}
 
+		c_bprops, err := bearer.GetProperties()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 
-		log.Println(string(bjson))
+		//log.Println(string(bjson))
+		log.Println("bearer properties ", c_bprops)
+
 		log.Println("should configure interface ",
 					c_if,
 					" with ip4 ",
 					c_ip4,
 					" with ip6 ",
 					c_ip6)
+
+		log.Println("waiting for state change")
+
+		state, err := connector.WaitForDisconnect()
+		if err != nil {
+			log.Fatal("error waiting for state change ",err.Error())
+		}
+
+		log.Println("exiting due to non-connect(ed/ing) state: ", state)
+
 }
