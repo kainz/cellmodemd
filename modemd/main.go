@@ -78,6 +78,13 @@ func main() {
 					" with ip6 ",
 					c_ip6)
 
+		log.Println("templating interface file and reloading")
+		err = connector.TriggerInterface()
+
+		if err != nil {
+			log.Fatal("error triggering interface",err.Error())
+		}
+
 		log.Println("waiting for state change")
 
 		state, err := connector.WaitForDisconnect()
