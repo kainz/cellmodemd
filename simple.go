@@ -139,11 +139,17 @@ func (sc *simpleConnector) TriggerInterface() error {
 	}
 
 	targetpath := filepath.Join(systemd_network_prefix, intf+".network")
+	linktarget := filepath.Join(systemd_network_link_target, intf+".network")
 
 	log.Println("will generate network file at ", targetpath, " with content\n", netdata.String())
 	targetMode := os.FileMode(0644)
 
 	err = os.MkdirAll(systemd_network_prefix, os.FileMode(0755))
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(systemd_network_link_target, os.FileMode(0755))
 	if err != nil {
 		return err
 	}
@@ -164,15 +170,31 @@ func (sc *simpleConnector) TriggerInterface() error {
 	if err != nil {
 		return err
 	}
+	err = renameio.Symlink(targetpath, linktarget)
+	if err != nil {
+		return err
+	}
 
-	log.Println("networkctl reloading")
+	log.Println("systemd reloading")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	networkcmd := exec.CommandContext(ctx, "networkctl", "reload")
+	networkcmd := exec.CommandContext(ctx, "systemctl", "daemon-reload")
 
 	output, err := networkcmd.CombinedOutput()
-	log.Println("network ctl output was (", err, "):", string(output))
+	log.Println("systemd reload output was (", err, "):", string(output))
+	if err != nil {
+		return err
+	}
+
+	log.Println("systemd-network reloading")
+
+	ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	networkcmd = exec.CommandContext(ctx, "systemctl", "restart", "systemd-networkd")
+
+	output, err = networkcmd.CombinedOutput()
+	log.Println("networkd restart output was (", err, "):", string(output))
 	if err != nil {
 		return err
 	}
@@ -182,7 +204,8 @@ func (sc *simpleConnector) TriggerInterface() error {
 
 const (
 	// TODO: determine what to do for multistack
-	systemd_network_prefix string = "/run/systemd/network"
+	systemd_network_prefix      string = "/run/systemd/network"
+	systemd_network_link_target string = "/etc/systemd/network"
 	// Disable LLDP, doesnt work on the cellmodems
 	systemd_network_template string = `
 [Match]
