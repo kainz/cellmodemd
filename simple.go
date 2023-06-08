@@ -3,6 +3,7 @@ package cellmodemd
 import (
 	"bytes"
 	"context"
+	"errors"
 	"github.com/google/renameio"
 	"github.com/maltegrosse/go-modemmanager"
 	"io"
@@ -22,6 +23,8 @@ type simpleConnector struct {
 	conproperties modemmanager.SimpleProperties
 	Bearer        modemmanager.Bearer
 }
+
+var ErrNoModem = errors.New("No modem found")
 
 type SimpleConnector interface {
 	Connect() error
@@ -44,6 +47,9 @@ func (sc *simpleConnector) init(index int) error {
 	modems, err := sc.mmgr.GetModems()
 	if err != nil {
 		return err
+	}
+	if len(modems) == 0 {
+		return ErrNoModem
 	}
 
 	sc.modem = modems[index]
