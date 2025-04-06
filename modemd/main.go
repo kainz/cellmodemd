@@ -23,6 +23,7 @@ func main() {
 		fmt.Println("ModemManager version", version)
 
 		apnPtr := flag.String("a", "", "APN to connect")
+		v6Mode := flag.Bool("6", false, "Enable ipv6 call")
 
 		flag.Parse()
 
@@ -30,7 +31,7 @@ func main() {
 			log.Fatal("must specify apn with -a")
 		}
 
-		connector, err := cellmodemd.GetConnector(mmgr, 0, *apnPtr, log.Default())
+		connector, err := cellmodemd.GetConnector(mmgr, 0, *apnPtr, *v6Mode, log.Default())
 		if err != nil {
 			log.Fatal(err.Error())
 		}

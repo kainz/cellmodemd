@@ -33,12 +33,16 @@ type SimpleConnector interface {
 	TriggerInterface() error
 }
 
-func GetConnector(mmgr modemmanager.ModemManager, index int, apn string, logger *log.Logger) (SimpleConnector, error) {
+func GetConnector(mmgr modemmanager.ModemManager, index int, apn string, v6mode bool, logger *log.Logger) (SimpleConnector, error) {
 	var c simpleConnector
 
 	c.mmgr = mmgr
 	c.logger = logger
 	c.conproperties.Apn = apn
+
+	if v6mode {
+		c.conproperties.IpType = modemmanager.MmBearerIpFamilyIpv4v6
+	}
 
 	return &c, c.init(index)
 }
